@@ -56,6 +56,7 @@ export class AuthService {
         text: "Simple",
         html: `<b>${code}</b>`,
       });
+
       const time = Date.now() + 120000;
 
       const user = this.authModelrepository.create({
@@ -92,6 +93,8 @@ export class AuthService {
 
       if (otp !== foundeduser.otp) throw new BadRequestException("Wrong otp");
 
+      await this.authModelrepository.update(foundeduser.id,{otp:"", otpTime: 0})
+
       const payload = { email: foundeduser.email, role: foundeduser.role };
 
       const access_token = await this.jwtService.signAsync(payload);
@@ -103,19 +106,37 @@ export class AuthService {
     }
   }
 
-  // async login(loginauthdto: LoginAuthDto):Promise<{message: string} | {token: string}> {
-  // const { email, password} = loginauthdto
-  // const foundeduser = await  this.authModel.findOne({where: {email}})
+  async login(loginauthdto: LoginAuthDto):Promise<{message: string}> {
+  const { email, password} = loginauthdto
+  const foundeduser = await  this.authModelrepository.findOne({where: {email}})
 
-  // if (!foundeduser) throw new NotFoundException("not found")
+  if (!foundeduser) throw new NotFoundException("User Not found")
 
-  //  const comp =  await bcrypt.compare(password, foundeduser.dataValues.password)
-  //  if (comp) {
-  //   return {token: await this.jwtService.signAsync({email: foundeduser.email})}
-  //  }else{
-  //   return {message: "Wrong password"}
-  //  }
-  // }
+   const comp =  await bcrypt.compare(password, foundeduser.password)
+
+   if (comp) {
+    
+      const code = Array.from({ length: 6 }, () =>
+        Math.floor(Math.random() * 10),
+      ).join("");
+
+      await this.transporter.sendMail({
+        from: "xudargabovqaxramon@gmail.com",
+        to: email,
+        subject: "Otp",
+        text: "Simple",
+        html: `<b>${code}</b>`,
+      });
+
+      const time = Date.now() + 120000
+
+      await this.authModelrepository.update(foundeduser.id, {otp: code, otpTime:time})
+
+      return {message: "Otp sent. please check your email"}
+   }else{
+    return {message: "Wrong password"}
+   }
+  }
 
   // async findAll():Promise<Auth[]> {
   //     return await this.authModel.findAll()

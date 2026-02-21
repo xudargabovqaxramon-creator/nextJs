@@ -17,16 +17,17 @@ export class AuthController {
 
   @HttpCode(200)
   @Post("verify")
-  login(@Body() verifyAuthDto: VerifyAuthDto) {
+  verify(@Body() verifyAuthDto: VerifyAuthDto) {
 
     return this.authService.verify(verifyAuthDto);
   }
 
-  // @Post("login")
-  // login(@Body() loginAuthDto: LoginAuthDto) {
+  @HttpCode(200)
+  @Post("login")
+  login(@Body() loginAuthDto: LoginAuthDto, ) {
 
-  //   return this.authService.login(loginAuthDto);
-  // }
+    return this.authService.login(loginAuthDto);
+  }
 
 
   // @Get()
