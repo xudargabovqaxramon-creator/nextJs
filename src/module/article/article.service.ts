@@ -8,9 +8,11 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class ArticleService {
   constructor(@InjectRepository(Article) private articleRepo: Repository<Article>){}
-  async create(createArticleDto: CreateArticleDto):Promise<Article> {
+  async create(createArticleDto: CreateArticleDto, file: Express.Multer.File):Promise<Article> {
     try {
       const article = this.articleRepo.create(createArticleDto)
+
+      article.backgroundImage = `http://localhost:4001/uploads${file.filename}`
       return await this.articleRepo.save(article)
     } catch (error) {
       throw new InternalServerErrorException(error.message)

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './module/auth/auth.module';
 import { Auth } from './module/auth/entities/auth.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Article } from './module/article/entities/article.entity';
 
 @Module({
   imports: [ConfigModule.forRoot({envFilePath: ".env", isGlobal:true}),
@@ -13,7 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       host: "localhost",
       password: String(process.env.DB_PASSWORD),
       database:String(process.env.DB_NAME),
-      entities:[Auth],
+      entities:[Auth, Article],
       synchronize:true,
       logging:false
     }),
