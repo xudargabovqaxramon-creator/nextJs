@@ -95,7 +95,7 @@ export class AuthService {
 
       await this.authModelrepository.update(foundeduser.id,{otp:"", otpTime: 0})
 
-      const payload = { email: foundeduser.email, role: foundeduser.role };
+      const payload = { email: foundeduser.email, roles: foundeduser.role };
 
       const access_token = await this.jwtService.signAsync(payload);
       return {
