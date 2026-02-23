@@ -3,11 +3,13 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto, LoginAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { VerifyAuthDto } from './dto/verify.dto';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiBody({type: CreateAuthDto})
   @HttpCode(200)
   @Post("register")
   create(@Body() createAuthDto: CreateAuthDto) {
@@ -15,6 +17,7 @@ export class AuthController {
     return this.authService.register(createAuthDto);
   }
 
+  @ApiBody({type:VerifyAuthDto})
   @HttpCode(200)
   @Post("verify")
   verify(@Body() verifyAuthDto: VerifyAuthDto) {

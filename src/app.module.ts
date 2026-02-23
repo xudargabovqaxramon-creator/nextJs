@@ -4,6 +4,9 @@ import { AuthModule } from './module/auth/auth.module';
 import { Auth } from './module/auth/entities/auth.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Article } from './module/article/entities/article.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './common/guard/auth.guard';
+import { RolesGuard } from './common/guard/role.guard';
 
 @Module({
   imports: [ConfigModule.forRoot({envFilePath: ".env", isGlobal:true}),
