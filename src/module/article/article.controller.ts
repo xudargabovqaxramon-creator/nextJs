@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Req } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -21,7 +21,7 @@ export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
   
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.USER,UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({description:"Create article api {public}"})
   @ApiConsumes("multipart/form-data")
   @ApiBody({type: CreateArticleSwaggerDto})
@@ -38,8 +38,12 @@ export class ArticleController {
   })
   )
   @Post()
-  create(@Body() createArticleDto: CreateArticleDto, @UploadedFile() file: Express.Multer.File) {
-    return this.articleService.create(createArticleDto, file);
+  create(
+    @Body() createArticleDto: CreateArticleDto,
+     @UploadedFile() file: Express.Multer.File,
+    @Req() req ) 
+     {
+    return this.articleService.create(createArticleDto, file, req.user.id);
   }
 
 
@@ -59,16 +63,16 @@ export class ArticleController {
   }
 
   
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @ApiOperation({description:"Update  article api {owner}"})
-  @ApiBody({type: UpdateArticleDto})
-  @ApiNotFoundResponse({description:"Article not found"})
-  @ApiOkResponse({description:"Updated article"})
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
-    return this.articleService.update(+id, updateArticleDto);
-  }
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  // @ApiOperation({description:"Update  article api {owner}"})
+  // @ApiBody({type: UpdateArticleDto})
+  // @ApiNotFoundResponse({description:"Article not found"})
+  // @ApiOkResponse({description:"Updated article"})
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
+  //   return this.articleService.update(+id, updateArticleDto);
+  // }
 
   
   @UseGuards(RolesGuard)

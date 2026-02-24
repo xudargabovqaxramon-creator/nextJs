@@ -3,14 +3,24 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { Tag } from '../tags/entities/tag.entity';
 
 @Injectable()
 export class ArticleService {
-  constructor(@InjectRepository(Article) private articleRepo: Repository<Article>){}
-  async create(createArticleDto: CreateArticleDto, file: Express.Multer.File):Promise<Article> {
+  constructor(
+    @InjectRepository(Article) private articleRepo: Repository<Article>,
+    @InjectRepository(Tag) private tagRepo: Repository<Tag>
+  ){}
+  async create(createArticleDto: CreateArticleDto, file: Express.Multer.File, userid: number):Promise<Article> {
     try {
-      const article = this.articleRepo.create(createArticleDto)
+      const tags  = await this.tagRepo.findBy({
+        id: In(createArticleDto.tags)
+      })
+      const article = this.articleRepo.create({
+        ...createArticleDto,
+        tags,
+      })
 
       article.backgroundImage = `http://localhost:4001/uploads${file.filename}`
       return await this.articleRepo.save(article)
@@ -39,19 +49,19 @@ export class ArticleService {
     }
   }
 
-  async update(id: number, updateArticleDto: UpdateArticleDto): Promise<{message: string}> {
-    try {
-      const foundedArticle = await this.articleRepo.findOne({where: {id}})
+  // async update(id: number, updateArticleDto: UpdateArticleDto): Promise<{message: string}> {
+  //   try {
+  //     const foundedArticle = await this.articleRepo.findOne({where: {id}})
 
-      if(!foundedArticle) throw new NotFoundException("Article not found")
+  //     if(!foundedArticle) throw new NotFoundException("Article not found")
 
-      await this.articleRepo.update(foundedArticle.id, updateArticleDto)
+  //     await this.articleRepo.update(foundedArticle.id, updateArticleDto)
 
-      return {message: "Updated article"}
-    } catch (error) {
-      throw new InternalServerErrorException(error.message)
-    }
-  }
+  //     return {message: "Updated article"}
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(error.message)
+  //   }
+  // }
 
   async remove(id: number): Promise<{message: string}> {
     try {

@@ -13,5 +13,5 @@ export class Tag extends BaseEntity {
     createdBy:Auth;
 
     @ManyToMany(()=> Article, (article) => article.tags)
-    articles: Article
+    articles: Article[];
 }

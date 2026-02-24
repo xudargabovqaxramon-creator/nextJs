@@ -15,11 +15,11 @@ export class Article extends BaseEntity{
   backgroundImage: string
 
   //relations
-  @ManyToOne(()=> Auth, (user)=> user.articles, {cascade:false})
-  @JoinTable({name: " author_join"})
+  @ManyToOne(()=> Auth, (user)=> user.articles, {cascade:false, nullable: false})
+  @JoinTable({name: " author_id"})
   author: Auth;
 
   @ManyToMany(()=> Tag, (tag)=> tag.articles)
-  @JoinTable({name: " article_join"})
-  tags: Tag
+  @JoinTable({name: " article_id"})
+  tags: Tag[];
 }
