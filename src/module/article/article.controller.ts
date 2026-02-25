@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Req, Query } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -11,6 +11,7 @@ import { AuthGuard } from 'src/common/guard/auth.guard';
 import { RolesGuard } from 'src/common/guard/role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { UserRole } from 'src/shared/constants/user.role';
+import { QueryDto } from './dto/query.dto';
 
 @ApiBearerAuth("JWT-auth")
 @UseGuards(AuthGuard)
@@ -50,8 +51,18 @@ export class ArticleController {
   @ApiOperation({description:"Get all article api {public}"})
   @ApiOkResponse({description:"list of articles"})
   @Get()
-  findAll() {
-    return this.articleService.findAll();
+  findAll(@Query() query: QueryDto) {
+    return this.articleService.findAll(query);
+  }
+
+  
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.USER,UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({description:"Get all myarticle api {public}"})
+  @ApiOkResponse({description:"list of articles"})
+  @Get("my-articles")
+  findAllMyArticles(@Req() req) {
+    return this.articleService.findAllMyArticles(req.user.id);
   }
 
   @ApiOperation({description:"Get one article api {public}"})
@@ -76,12 +87,12 @@ export class ArticleController {
 
   
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.USER, UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({description:"Delete article api {owner}"})
   @ApiNotFoundResponse({description:"Article not found"})
   @ApiOkResponse({description:"Deleted article"})
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.articleService.remove(+id);
+  remove(@Param('id') id: string, @Req() req) {
+    return this.articleService.remove(+id, req.user.id);
   }
 }

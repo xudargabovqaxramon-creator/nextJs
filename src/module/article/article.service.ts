@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
 import { In, Repository } from 'typeorm';
 import { Tag } from '../tags/entities/tag.entity';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class ArticleService {
@@ -12,7 +13,7 @@ export class ArticleService {
     @InjectRepository(Article) private articleRepo: Repository<Article>,
     @InjectRepository(Tag) private tagRepo: Repository<Tag>
   ){}
-  async create(createArticleDto: CreateArticleDto, file: Express.Multer.File, userid: number):Promise<Article> {
+  async create(createArticleDto: CreateArticleDto, file: Express.Multer.File, userId:any):Promise<Article> {
     try {
       const tags  = await this.tagRepo.findBy({
         id: In(createArticleDto.tags)
@@ -20,6 +21,7 @@ export class ArticleService {
       const article = this.articleRepo.create({
         ...createArticleDto,
         tags,
+        author: userId
       })
 
       article.backgroundImage = `http://localhost:4001/uploads${file.filename}`
@@ -29,9 +31,38 @@ export class ArticleService {
     }
   }
 
-  async findAll():Promise<Article[]> {
+  async findAll(query: QueryDto):Promise<Article[]> {
     try {
-      return await this.articleRepo.find()
+      const { page= 1, limit= 10, search   } = query;
+
+      const queryBuilder = this.articleRepo.createQueryBuilder("article")
+      .leftJoinAndSelect("article.tags", "tags")
+      .leftJoinAndSelect("article.author", "author")
+      .where("article.isActive = :isActive", { isActive: true })
+      .andWhere("article.deletedAt IS NULL");
+
+      if (search) {
+        queryBuilder.andWhere("article.title ILIKE :search", { search: `%${search}%` });
+      }
+
+      return await queryBuilder
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
+  
+  async findAllMyArticles(userId):Promise<Article[]> {
+    try {
+      const articles = await this.articleRepo.find(
+        {
+          where: {author: userId},
+          relations: ["tags", "author"]
+        })
+      return articles
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
@@ -63,13 +94,13 @@ export class ArticleService {
   //   }
   // }
 
-  async remove(id: number): Promise<{message: string}> {
+  async remove(id: number, userId: number): Promise<{message: string}> {
     try {
        const foundedArticle = await this.articleRepo.findOne({where: {id}})
 
       if(!foundedArticle) throw new NotFoundException("Article not found")
 
-      await this.articleRepo.delete(foundedArticle.id)
+      await this.articleRepo.softDelete(foundedArticle.id)
 
       return {message: "deleted article"}
     } catch (error) {
