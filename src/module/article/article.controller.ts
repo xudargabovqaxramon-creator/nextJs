@@ -41,9 +41,9 @@ export class ArticleController {
   @Post()
   create(
     @Body() createArticleDto: CreateArticleDto,
-     @UploadedFile() file: Express.Multer.File,
-    @Req() req ) 
-     {
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req
+  ) {
     return this.articleService.create(createArticleDto, file, req.user.id);
   }
 

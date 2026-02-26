@@ -7,17 +7,17 @@ export class QueryDto {
     @IsOptional()
     @Type(() => Number)
     @ApiProperty({default: 1, minimum: 1})
-    page: number;
+    page?: number;
     
     @IsNumber()
     @IsOptional()
     @Type(() => Number)
     @ApiProperty({default: 10, minimum: 1, maximum: 100})
-    limit: number;
+    limit?: number;
 
     
     @IsNumber()
     @IsOptional()
-    @ApiProperty({default: 10, minimum: 1, maximum: 100})
-    search: number;
+    @ApiProperty({})
+    search?: string;
 }

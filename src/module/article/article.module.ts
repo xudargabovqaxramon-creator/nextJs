@@ -4,9 +4,10 @@ import { ArticleController } from './article.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
 import { Tag } from '../tags/entities/tag.entity';
+import { ArticleImage } from '../article-images/entities/article-image.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Article, Tag])],
+  imports:[TypeOrmModule.forFeature([Article, Tag, ArticleImage])],
   controllers: [ArticleController],
   providers: [ArticleService],
 })

@@ -31,7 +31,7 @@ export class ArticleService {
     }
   }
 
-  async findAll(query: QueryDto):Promise<Article[]> {
+  async findAll(query: QueryDto) {
     try {
       const { page= 1, limit= 10, search   } = query;
 
@@ -42,13 +42,22 @@ export class ArticleService {
       .andWhere("article.deletedAt IS NULL");
 
       if (search) {
-        queryBuilder.andWhere("article.title ILIKE :search", { search: `%${search}%` });
+        queryBuilder.andWhere("(article.title ILIKE :search OR article.body ILIKE :search OR tags.name ILIKE :search)", { search: `%${search}%` });
       }
 
-      return await queryBuilder
+      const total = await queryBuilder.getCount();
+
+      const result = await queryBuilder.orderBy("article.createdAt", "DESC")
         .skip((page - 1) * limit)
         .take(limit)
         .getMany();
+      
+      return {
+        next : total > page * limit ? {page: page + 1, limit} : undefined,
+        prev: page > 1 ? {page: page - 1, limit} : undefined,
+        totalPages : Math.ceil(total / limit),
+        result,
+      }
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }

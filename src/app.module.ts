@@ -7,6 +7,8 @@ import { Article } from './module/article/entities/article.entity';
 import { Tag } from './module/tags/entities/tag.entity';
 import { ArticleModule } from './module/article/article.module';
 import { TagsModule } from './module/tags/tags.module';
+import { ArticleImage } from './module/article-images/entities/article-image.entity';
+import { ArticleImagesModule } from './module/article-images/article-images.module';
 
 @Module({
   imports: [ConfigModule.forRoot({envFilePath: ".env", isGlobal:true}),
@@ -17,13 +19,14 @@ import { TagsModule } from './module/tags/tags.module';
       host: "localhost",
       password: String(process.env.DB_PASSWORD),
       database:String(process.env.DB_NAME),
-      entities:[Auth, Article, Tag],
+      entities:[Auth, Article, Tag, ArticleImage],
       synchronize:true,
       logging:false
     }),
     AuthModule,
     ArticleModule,
-    TagsModule
+    TagsModule,
+    ArticleImagesModule
   ],
   controllers: [],
   providers: [],
